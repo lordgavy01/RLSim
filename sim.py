@@ -15,7 +15,31 @@ key=0
 paused=False
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
 
+"""
+Env_state{
+    Robot's x,y,theta
+    static_obstacles=list of polygons
+    Dynamic Obstacles (humans) x,y,theta    
+}
+Robot_state{
+    Lidar depths around robot
+    relative direction of goal from robot
+}
 
+Action{
+    velocity v
+    angular w
+    Delta time
+}
+
+def applyAction(env_oldState,action)  - Returns New env_State
+
+def convert_env_state_to_robot_state(env_oldState)
+
+def get_robot's_action(robot_state) - calls APF
+
+
+"""
 while running:
     screen.blit(mapBackground.image, mapBackground.rect)
     for events in pygame.event.get():
@@ -47,13 +71,10 @@ while running:
     for object in positions:
         pygame.draw.circle(screen,(255,0,0),(object[0],object[1]),10)
 
-    lidar_angles,lidar_depths,lidar_hitpoints=get_lidar_depths(positions[0],radians(90),60)
+    lidar_angles,lidar_depths,lidar_hitpoints=get_lidar_depths(positions[0],1e9,radians(90),60)
     for i in range(len(lidar_angles)):
         angle=lidar_angles[i]
-        if lidar_depths[i]==INF or lidar_depths[i]>maxDistance:
-            pygame.draw.line(screen,(0,0,255),(object[0],object[1]),(object[0]+maxDistance*cos(angle),object[1]+maxDistance*sin(angle)))
-        else:
-            pygame.draw.line(screen,(0,255,0),(object[0],object[1]),lidar_hitpoints[i])    
+        pygame.draw.line(screen,(0,255,0),(object[0],object[1]),lidar_hitpoints[i])    
 
     key+=1
     pygame.display.update()
