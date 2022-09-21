@@ -1,7 +1,7 @@
 from util import *
 
 def APF(distanceGoal,thetaGoal,lidarData,vmax=10,wmax=radians(5)):
-    lidarAngles,lidarDepths,lidarHitoints=lidarData
+    lidarAngles,lidarDepths=lidarData
 
     # Attraction Modelling
     kAttr=10
@@ -14,7 +14,7 @@ def APF(distanceGoal,thetaGoal,lidarData,vmax=10,wmax=radians(5)):
 
 
     # Repulsion Modelling
-    kRep=100
+    kRep=0
     distanceThresholdRepulsion=20
 
     fRep=(0,0)

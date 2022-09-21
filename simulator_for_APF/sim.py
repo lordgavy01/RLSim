@@ -42,5 +42,4 @@ TO DO:
 
 1) get_lidar_depths() in lidar.py does not check hit with other agents . Add that.
 2) Do parameter setting for APF() in planner.py
-3) Add body for reward_function() in environment.py 
 """

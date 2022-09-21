@@ -12,6 +12,8 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
+INF=1e18
+
 image_name='geomap.png'
 mapBackground=Background(image_name,[0,0])
 length=50

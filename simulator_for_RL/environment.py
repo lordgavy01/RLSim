@@ -31,15 +31,17 @@ class Environment:
             goalCoordinates=(self.agentGoals[i][0],self.agentGoals[i][1])
             pygame.draw.circle(screen,agentColors[i],center=agentCoordinates,radius=10)
             pygame.draw.circle(screen,agentColors[i],center=goalCoordinates,radius=10,width=2)            
-        rayColors=[Colors.blue,Colors.green]
-        lidar_angles,lidar_depths,lidar_hitpoints=self.agentStates[0].lidarData
-        for i in range(len(lidar_angles)):
-            angle=lidar_angles[i]
+        rayColors=[Colors.green,Colors.blue]
+        lidarAngles,lidarDepths=self.agentStates[0].lidarData
+        for i in range(len(lidarAngles)):
+            curAngle=normalAngle(self.agentPoses[0][2]+lidarAngles[i])
             robotCoordinates=(self.agentPoses[0][0],self.agentPoses[0][1])
-            if lidar_depths[i]>=1e9:
-                pygame.draw.line(screen,rayColors[1],robotCoordinates,lidar_hitpoints[i])
+            lidarHitpoint=(robotCoordinates[0]+lidarDepths[i]*cos(curAngle),
+                           robotCoordinates[1]+lidarDepths[i]*sin(curAngle))
+            if lidarDepths[i]>=1e9:
+                pygame.draw.line(screen,rayColors[0],robotCoordinates,lidarHitpoint)
             else: 
-                pygame.draw.line(screen,rayColors[0],robotCoordinates,lidar_hitpoints[i])    
+                pygame.draw.line(screen,rayColors[1],robotCoordinates,lidarHitpoint)    
 
     def updateAgentStates(self):
         self.agentStates=[]
@@ -58,7 +60,9 @@ class Environment:
             action=robotAction
             if not i==0:
                 action=self.agentStates[i].selectAction()
-            self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v=action[0],w=action[1],dT=1)  
+            v=action[0]
+            w=normalAngle(self.agentPoses[i][2]+action[1])
+            self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1)  
         self.updateAgentStates()        
         newEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
         return Environment.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)

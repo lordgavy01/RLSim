@@ -4,7 +4,7 @@ from planner import *
 class AgentState:
 
     # pose, goal --> x,y,theta(in radians)
-    # lidarData --> 3 lists : lidarAngles(in radians), lidarDepths, lidarHitpoints
+    # lidarData --> 2 lists : lidarAngles(in radians), lidarDepths
 
     def __init__(self,distanceGoal,thetaGoal,lidarData):
         self.distanceGoal=distanceGoal        
