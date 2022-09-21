@@ -51,7 +51,7 @@ class Environment:
             pose=self.agentPoses[i]
             goal=self.agentGoals[i]
             distanceGoal=euclidean((pose[0],pose[1]),(goal[0],goal[1]))
-            thetaGoal=normalAngle(atan2(goal[0]-pose[0],goal[1]-pose[1]))
+            thetaGoal=normalAngle(atan2(goal[1]-pose[1],goal[0]-pose[0])-pose[2])
             self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData))
     
     def executeAction(self,robotAction):
