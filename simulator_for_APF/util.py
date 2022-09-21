@@ -74,7 +74,7 @@ def getCorners(theta,X,Y):
 def normalAngle(theta):
   return atan2(sin(theta),cos(theta))
 
-def getIntersection(line1,line2):
+def getLinesegmentsIntersection(line1,line2):
     ((x1,y1),(x2,y2))=line1
     ((x3,y3),(x4,y4))=line2
     denom = (y4-y3)*(x2-x1) - (x4-x3)*(y2-y1)
@@ -115,3 +115,28 @@ def addForces(F1,F2):
     magnitudeRes=sqrt(x_comp**2+y_comp**2)
     thetaRes=normalAngle(atan2(y_comp,x_comp))
     return (magnitudeRes,thetaRes)
+
+def getLinesegmentCircleIntersection(line1,circle):
+    p1,p2=line1
+    center,radius=circle
+    
+    Q=pygame.math.Vector2(center[0],center[1])
+    r=radius
+    P1=pygame.math.Vector2(p1[0],p1[1])
+    V=pygame.math.Vector2(p2[0]-p1[0],p2[1]-p1[1])
+    a = V.dot(V)
+    b = 2 * V.dot(P1 - Q)
+    c = P1.dot(P1) + Q.dot(Q) - 2 * P1.dot(Q) - r**2
+    disc = b**2 - 4 * a * c
+    if disc < 0:
+        return False
+    sqrt_disc = sqrt(disc)
+    t1 = (-b + sqrt_disc) / (2 * a)
+    t2 = (-b - sqrt_disc) / (2 * a)
+    if not (0 <= t1 <= 1 or 0 <= t2 <= 1):
+        return False
+    inter_p1=P1+t1*V
+    inter_p2=P1+t2*V
+    if euclidean(p1,inter_p1)<euclidean(p1,inter_p2):
+        return inter_p1
+    return inter_p2
