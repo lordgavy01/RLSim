@@ -111,7 +111,7 @@ def addForces(F1,F2):
     magnitude1,theta1=F1
     magnitude2,theta2=F2
     x_comp=magnitude1*cos(theta1)+magnitude2*cos(theta2)
-    y_comp=magnitude1*sin(theta2)+magnitude2*sin(theta2)
+    y_comp=magnitude1*sin(theta1)+magnitude2*sin(theta2)
     magnitudeRes=sqrt(x_comp**2+y_comp**2)
-    thetaRes=normalAngle(atan2(x_comp,y_comp))
+    thetaRes=normalAngle(atan2(y_comp,x_comp))
     return (magnitudeRes,thetaRes)
