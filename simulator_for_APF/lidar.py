@@ -1,7 +1,7 @@
 from util import*
 INF=1e18
 
-def get_lidar_depths(robotPose,max_lidar_distance,field_of_view=radians(90),number_of_lidar_angles=20):
+def get_lidar_depths(obstacles,robotPose,max_lidar_distance,field_of_view=radians(90),number_of_lidar_angles=20):
   # Assuming robot_theta (with positive x-axis) and field_of_veiew are in radians
   robot_x,robot_y,robot_theta=robotPose
   lidar_angles=[]  
@@ -23,8 +23,7 @@ def get_lidar_depths(robotPose,max_lidar_distance,field_of_view=radians(90),numb
     min_distance=INF
     hitpoint=(INF,INF)
     checker_line=((robot_x,robot_y),(robot_x+INF*cos(lidar_angle),robot_y+INF*sin(lidar_angle)))
-    for poly in Polygons:
-      obstacle=poly[1]
+    for centre,obstacle in obstacles:
       for i in range(len(obstacle)):
         edge=(obstacle[i],obstacle[(i+1)%len(obstacle)])        
         p=getIntersection(edge,checker_line)

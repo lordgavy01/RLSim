@@ -4,8 +4,6 @@ import pygame
 import os
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
-
-
 np.random.seed(1)
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
@@ -22,7 +20,6 @@ Polygons=[]
 positions=[]
 goals=[]
 maxDistance=100
-
 
 def addObject(source,goal):
     positions.append(source)
@@ -90,3 +87,29 @@ def getIntersection(line1,line2):
     x = x1 + ua * (x2-x1)
     y = y1 + ua * (y2-y1)
     return (x,y)
+
+def kinematic_equation(oldPose,v,w,dT):
+    xOld,yOld,thetaOld=oldPose
+    if w==0:
+        xNew=xOld+v*dT*cos(thetaOld)
+        yNew=yOld+v*dT*sin(thetaOld)
+        thetaNew=thetaOld
+        return (xNew,yNew,thetaNew)
+    dTheta=w*dT
+    L=v/w
+    ICCx=xOld-L*sin(thetaOld)
+    ICCy=yOld+L*cos(thetaOld)
+    xNew=(cos(dTheta)*(xOld-ICCx))-(sin(dTheta)*(yOld-ICCy))+ICCx
+    yNew=(sin(dTheta)*(xOld-ICCx))+(cos(dTheta)*(yOld-ICCy))+ICCy
+    thetaNew=thetaOld+dTheta
+    thetaNew=atan2(sin(thetaNew),cos(thetaNew))
+    return (xNew,yNew,thetaNew)
+
+def addForces(F1,F2):
+    magnitude1,theta1=F1
+    magnitude2,theta2=F2
+    x_comp=magnitude1*cos(theta1)+magnitude2*cos(theta2)
+    y_comp=magnitude1*sin(theta2)+magnitude2*sin(theta2)
+    magnitudeRes=sqrt(x_comp**2+y_comp**2)
+    thetaRes=normalAngle(atan2(x_comp,y_comp))
+    return (magnitudeRes,thetaRes)
