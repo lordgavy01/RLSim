@@ -10,14 +10,17 @@ class Environment:
     # agentStates --> List of objects of class AgentState.
     # agent 0 is robot, others are humans 
     
-    def reset(self,obstacles=Polygons,agentList=[((275,390,pi/4),(689,236,0)),
-                                                 ((700,20,pi/2),(200,200,0))]):
+    def reset(self,obstacles=Polygons,agentRadius=10,agentList=[((275,390,pi/4),(689,236,0)),
+                                                                ((700,20,pi/2),(200,200,0)),
+                                                                ((689,236,0),(275,390,0)),
+                                                                ((355,360,0),(275,390,0)),]):
         self.obstacles=obstacles
         self.agentPoses=[]
         self.agentGoals=[]
         self.agentStates=[]
         for agent in agentList:
             self.addAgent(agent[0],agent[1])
+        self.agentRadius=agentRadius
         self.updateAgentStates()
     
     def addAgent(self,agentPose,agentGoal):
@@ -25,12 +28,12 @@ class Environment:
         self.agentGoals.append(agentGoal)
 
     def render(self,screen):
-        agentColors=[Colors.red,Colors.blue]
+        agentColors=[Colors.red,Colors.blue,Colors.cyan,Colors.yellow,Colors.green]
         for i in range(len(self.agentPoses)):
             agentCoordinates=(self.agentPoses[i][0],self.agentPoses[i][1])
             goalCoordinates=(self.agentGoals[i][0],self.agentGoals[i][1])
-            pygame.draw.circle(screen,agentColors[i],center=agentCoordinates,radius=10)
-            pygame.draw.circle(screen,agentColors[i],center=goalCoordinates,radius=10,width=2)            
+            pygame.draw.circle(screen,agentColors[i],center=agentCoordinates,radius=self.agentRadius)
+            pygame.draw.circle(screen,agentColors[i],center=goalCoordinates,radius=self.agentRadius,width=2)            
         rayColors=[Colors.green,Colors.blue]
         lidarAngles,lidarDepths=self.agentStates[0].lidarData
         for i in range(len(lidarAngles)):
@@ -46,8 +49,8 @@ class Environment:
     def updateAgentStates(self):
         self.agentStates=[]
         for i in range(len(self.agentPoses)):
-            lidarData=get_lidar_depths(self.obstacles,self.agentPoses[i],max_lidar_distance=1e9,field_of_view=radians(180),
-                                       number_of_lidar_angles=50)
+            lidarData=get_lidar_depths(i,self.agentPoses,self.agentRadius,self.obstacles,max_lidar_distance=1e9,
+                                       field_of_view=radians(180),number_of_lidar_angles=50)
             pose=self.agentPoses[i]
             goal=self.agentGoals[i]
             distanceGoal=euclidean((pose[0],pose[1]),(goal[0],goal[1]))

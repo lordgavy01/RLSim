@@ -1,10 +1,10 @@
 from util import *
 
-def APF(distanceGoal,thetaGoal,lidarData,vmax=10,wmax=radians(180)):
+def APF(distanceGoal,thetaGoal,lidarData,vmax=0.5,wmax=radians(20)):
     lidarAngles,lidarDepths=lidarData
     
     # Attraction Modelling
-    kAttr=10
+    kAttr=50
     distanceThresholdAttraction=1
 
     if distanceGoal<=distanceThresholdAttraction:
@@ -13,8 +13,8 @@ def APF(distanceGoal,thetaGoal,lidarData,vmax=10,wmax=radians(180)):
         fAttr=(distanceThresholdAttraction*kAttr,thetaGoal)
 
     # Repulsion Modelling
-    kRep=0
-    distanceThresholdRepulsion=20
+    kRep=1e5
+    distanceThresholdRepulsion=400
 
     fRep=(0,0)
     for i in range(len(lidarAngles)):
@@ -30,6 +30,8 @@ def APF(distanceGoal,thetaGoal,lidarData,vmax=10,wmax=radians(180)):
     fRes=addForces(fAttr,fRep)
     kParam=0.5
     w=normalAngle(kParam*(fRes[1]))
+    if abs(w)>wmax:
+        w=wmax*(w/abs(w))
     v=min(kParam*fRes[0],vmax)
 
     bestAction=(v,w)

@@ -40,9 +40,8 @@ while running:
 """
 TO DO:
 
-1) get_lidar_depths() in lidar.py does not check hit with other agents . Add that.
-2) Add body for reward_function() in environment.py 
-3) Add 2 methods in class AgentState in agent.py :
+1) Add body for reward_function() in environment.py 
+2) Add 2 methods in class AgentState in agent.py :
     update_NN()
     get_action_from_NN()
 """

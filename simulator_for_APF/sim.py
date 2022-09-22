@@ -35,11 +35,3 @@ while running:
     env.render(screen)
     pygame.display.update()
     key+=1
-
-
-"""
-TO DO:
-
-1) get_lidar_depths() in lidar.py does not check hit with other agents . Add that.
-2) Do parameter setting for APF() in planner.py
-"""
