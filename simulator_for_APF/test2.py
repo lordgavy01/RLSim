@@ -6,7 +6,7 @@ import pygame
 np.random.seed(10)
 pygame.init()
 
-image_name='geomap.png'
+image_name='cir.png'
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):

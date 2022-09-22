@@ -1,6 +1,6 @@
 from util import *
 
-def APF(distanceGoal,thetaGoal,lidarData,vmax=0.5,wmax=radians(20)):
+def APF(distanceGoal,thetaGoal,lidarData,vmax=2,wmax=radians(20)):
     lidarAngles,lidarDepths=lidarData
     
     # Attraction Modelling
