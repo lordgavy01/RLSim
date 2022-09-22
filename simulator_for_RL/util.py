@@ -22,6 +22,16 @@ Polygons=[]
 positions=[]
 goals=[]
 maxDistance=100
+indexToAct={}
+VMAX=0.5
+WMAX=radians(20)
+vsamples=[-VMAX,0,VMAX]
+wsamples=[-WMAX,-WMAX/2,0,WMAX/2,WMAX]
+index=0
+for v in vsamples:
+    for w in wsamples:
+        indexToAct[index]=(v,w)
+        index+=1
 
 def addObject(source,goal):
     positions.append(source)

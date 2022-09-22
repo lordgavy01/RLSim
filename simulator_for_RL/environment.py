@@ -10,7 +10,7 @@ class Environment:
     # agentStates --> List of objects of class AgentState.
     # agent 0 is robot, others are humans 
     
-    def reset(self,obstacles=Polygons,agentRadius=10,agentList=[((275,390,pi/4),(689,236,0)),
+    def reset(self,obstacles=Polygons,agentRadius=10,agentList=[((345,390,pi/4),(689,236,0)),
                                                                 ((700,20,pi/2),(200,200,0)),
                                                                 ((689,236,0),(275,390,0)),
                                                                 ((355,360,0),(275,390,0)),]):
@@ -68,7 +68,26 @@ class Environment:
             self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1)  
         self.updateAgentStates()        
         newEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
-        return Environment.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)
-    
-    def rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState):
-        return 0
+        return self.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)
+
+    def checkCollision(self,newState):
+        obstacles,newAgentPoses,_,_=newState
+        for agents in newAgentPoses:
+            for obs in obstacles:
+                for pts in obs[1]:
+                    if euclidean(agents,pts)<=3:
+                        return True
+        return False
+
+    def rewardFunction(self,oldEnvironmentState,robotAction,newEnvironmentState):
+        if self.checkCollision(newEnvironmentState):
+            return (-200,0)
+        _,_,_,oldAgentStates=oldEnvironmentState
+        _,_,_,newAgentStates=newEnvironmentState
+        r=oldAgentStates[0].distanceGoal-newAgentStates[0].distanceGoal
+        if newAgentStates[0].distanceGoal<10:
+            return (50,1)
+        if r>=0:
+            return (5**r,1)
+        else:
+            return (-5**r,1)
