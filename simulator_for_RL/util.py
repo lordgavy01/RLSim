@@ -14,7 +14,7 @@ class Background(pygame.sprite.Sprite):
 
 INF=1e18
 
-image_name='geomap.png'
+image_name='cir.png'
 mapBackground=Background(image_name,[0,0])
 length=50
 breadth=30
@@ -32,6 +32,7 @@ for v in vsamples:
     for w in wsamples:
         indexToAct[index]=(v,w)
         index+=1
+
 
 def addObject(source,goal):
     positions.append(source)
