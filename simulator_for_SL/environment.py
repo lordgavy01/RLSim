@@ -21,6 +21,8 @@ class Environment:
         self.agentProgress=[0]*len(agentSubGoals)
         self.agentPoses=[]
         self.agentGoals=[]
+        # self.agentVOld=[]
+        # self.agentThetaOld=[]
         for agent in agentSubGoals:
             self.agentPoses.append(agent[0])
             self.agentGoals.append(agent[1])
@@ -42,8 +44,8 @@ class Environment:
         for i in range(len(lidarAngles)):
             curAngle=normalAngle(self.agentPoses[0][2]+lidarAngles[i])
             robotCoordinates=(self.agentPoses[0][0],self.agentPoses[0][1])
-            lidarHitpoint=(robotCoordinates[0]+lidarDepths[i]*cos(curAngle),
-                           robotCoordinates[1]+lidarDepths[i]*sin(curAngle))
+            lidarHitpoint=(robotCoordinates[0]+(lidarDepths[i]+self.agentRadius)*cos(curAngle),
+                           robotCoordinates[1]+(lidarDepths[i]+self.agentRadius)*sin(curAngle))
             if lidarDepths[i]>=1e9:
                 pygame.draw.line(screen,rayColors[0],robotCoordinates,lidarHitpoint)
             else: 
@@ -62,6 +64,8 @@ class Environment:
     
     def executeAction(self,robotAction,noise=0):
         oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
+        self.agentVOld=[]
+        self.agentThetaOld=[]
         for i in range(len(self.agentPoses)):
             action=robotAction
             if not i==0:
@@ -73,6 +77,8 @@ class Environment:
                 v=v*(1+noise)
                 w=normalAngle(w*(1+noise))
             self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1) 
+            # self.agentVOld.append(v)
+            # self.agentThetaOld.append(self.agentPoses[i][2])
             if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<2:
                 if not (self.agentProgress[i]+1)==(len(self.agentSubGoals[i])-1):
                     self.agentProgress[i]+=1

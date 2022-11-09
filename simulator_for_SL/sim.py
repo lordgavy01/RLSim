@@ -19,6 +19,8 @@ print("Map Dimensions:",(mapBackground.image.get_width(),mapBackground.image.get
 env=Environment()
 env.reset()
 
+# env.agentStates[0].policyNN.train("APF_data.csv")
+
 while running:
     screen.blit(mapBackground.image, mapBackground.rect)
     for events in pygame.event.get():
