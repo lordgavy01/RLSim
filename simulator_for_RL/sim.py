@@ -18,7 +18,7 @@ pygame.display.set_caption("Reactive Multi-Robot Navigation")
 running=True
 key=0
 paused=False
-lr=7e-6
+lr=1e-5
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
 
 print("Map Dimensions:",(mapBackground.image.get_width(),mapBackground.image.get_height()))
@@ -37,13 +37,13 @@ while running:
     user_input=pygame.key.get_pressed()
     if(user_input[pygame.K_UP] or user_input[pygame.K_w]):
         scores=[]
-        for i_episode in range(1000):
-            max_t=25
+        for i_episode in range(300):
+            max_t=50
             gamma=0.95
             saved_log_probs = []
             rewards = []
-            env.reset()
-            env.agentStates[0].myPolicy=bestPolicy
+            # env.reset()
+            # env.agentStates[0].myPolicy=bestPolicy
             # Line 4 of pseudocode
             for t in range(max_t):
                 lidarAngles,lidarDepths=env.agentStates[0].lidarData

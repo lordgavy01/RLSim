@@ -10,17 +10,20 @@ class Environment:
     # agentStates --> List of objects of class AgentState.
     # agent 0 is robot, others are humans 
     
-    def reset(self,obstacles=Polygons,agentRadius=10,agentList=[((345,390,pi/4),(689,236,0)),
-                                                                ((700,20,pi/2),(200,200,0)),
-                                                                ((689,236,0),(275,390,0)),
-                                                                ((355,360,0),(275,390,0)),]):
+    def reset(self,obstacles=Polygons,agentRadius=10,agentSubGoals=[((91, 90,0),(201, 239),(543, 225,0),(619, 89,0)),
+                                                                ((645, 223,0),(449, 227,0)),
+                                                                ((666, 454,0),(71, 288,0)),
+                                                                ((381, 95,0),(251, 249,0))]):
         self.obstacles=obstacles
+        self.agentStates=[]
+        self.agentSubGoals=agentSubGoals
+        self.agentRadius=agentRadius
+        self.agentProgress=[0]*len(agentSubGoals)
         self.agentPoses=[]
         self.agentGoals=[]
-        self.agentStates=[]
-        for agent in agentList:
-            self.addAgent(agent[0],agent[1])
-        self.agentRadius=agentRadius
+        for agent in agentSubGoals:
+            self.agentPoses.append(agent[0])
+            self.agentGoals.append(agent[1])
         self.updateAgentStates()
     
     def addAgent(self,agentPose,agentGoal):
@@ -57,6 +60,19 @@ class Environment:
             thetaGoal=normalAngle(atan2(goal[1]-pose[1],goal[0]-pose[0])-pose[2])
             self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData))
     
+    # def executeAction(self,robotAction):
+    #     oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
+    #     for i in range(len(self.agentPoses)):
+    #         action=robotAction
+    #         if not i==0:
+    #             action=self.agentStates[i].selectAction()
+    #         v=action[0]
+    #         w=action[1]
+    #         self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1)  
+    #     self.updateAgentStates()        
+    #     newEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
+    #     return self.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)
+
     def executeAction(self,robotAction):
         oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
         for i in range(len(self.agentPoses)):
@@ -65,10 +81,15 @@ class Environment:
                 action=self.agentStates[i].selectAction()
             v=action[0]
             w=action[1]
-            self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1)  
+            self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1) 
+            if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<2:
+                if not (self.agentProgress[i]+1)==(len(self.agentSubGoals[i])-1):
+                    self.agentProgress[i]+=1
+                    self.agentGoals[i]=self.agentSubGoals[i][self.agentProgress[i]+1]
         self.updateAgentStates()        
         newEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
         return self.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)
+
 
     def checkCollision(self,newState):
         obstacles,newAgentPoses,_,_=newState
