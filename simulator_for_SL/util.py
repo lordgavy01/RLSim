@@ -15,62 +15,21 @@ class Background(pygame.sprite.Sprite):
 
 INF=1e18
 
-image_name='cir.png'
+image_name='map.png'
 mapBackground=Background(image_name,[0,0])
-length=50
-breadth=30
 Polygons=[]
-positions=[]
-goals=[]
-maxDistance=100
-
-def addObject(source,goal):
-    positions.append(source)
-    goals.append(goal)
 
 def initMap():
-    # Read list of Polygons from out.txt where one line in that file is list of points of one polygon
-    with open('out.txt') as f:
-        for line in f:
-            Polygon=[]
-            lst=[]
-            comma=False
-            Fir,Sec='',''
-            Cent=(-1,-1)
-            for p in line:
-                if p==' ' or p=='(':
-                    continue
-                if p==',':
-                    comma=True
-                    continue
-                if p==')':
-                    if Cent[0]==-1:
-                        Cent=(float(Fir),float(Sec))
-                    else:
-                        lst.append((float(Fir),float(Sec)))
-                    Fir,Sec='',''
-                    comma=False
-                    continue
-                if comma:
-                    Sec+=p
-                else:
-                    Fir+=p              
-            if len(lst):
-                Polygon=[Cent,lst]
-                Polygons.append(Polygon)
-
+    with open('map_obstacles.txt') as file:
+        for line in file:
+            line_data=[int(x) for x in line.split()]
+            polygon=[]
+            for i in range(0,len(line_data),2):
+                polygon.append((line_data[i],line_data[i+1]))
+                Polygons.append(polygon)
 
 def euclidean(A,B):
     return sqrt((A[0]-B[0])**2+(A[1]-B[1])**2)
-
-def getCorners(theta,X,Y): 
-    l=length/2
-    b=breadth/2
-    C1=(X+l*cos(theta)+b*cos(pi/2+theta),Y+l*sin(theta)+b*sin(pi/2+theta))
-    C2=(X-l*cos(theta)+b*cos(pi/2+theta),Y-l*sin(theta)+b*sin(pi/2+theta))
-    C3=(X-l*cos(theta)-b*cos(pi/2+theta),Y-l*sin(theta)-b*sin(pi/2+theta))
-    C4=(X+l*cos(theta)-b*cos(pi/2+theta),Y+l*sin(theta)-b*sin(pi/2+theta))
-    return C1,C2,C3,C4
 
 def normalAngle(theta):
   return atan2(sin(theta),cos(theta))

@@ -18,7 +18,7 @@ def get_lidar_depths(index,agentPoses,agentRadius,obstacles,max_lidar_distance,
     cur_angle=normalAngle(lidar_angle+agent_theta)
     min_distance=INF
     checker_line=((agent_x,agent_y),(agent_x+INF*cos(cur_angle),agent_y+INF*sin(cur_angle)))
-    for centre,obstacle in obstacles:
+    for obstacle in obstacles:
       for i in range(len(obstacle)):
         edge=(obstacle[i],obstacle[(i+1)%len(obstacle)])        
         p=getLinesegmentsIntersection(checker_line,edge)
