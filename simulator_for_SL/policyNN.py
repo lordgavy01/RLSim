@@ -1,16 +1,13 @@
-# class Policy():
-#     def __init__(self):
+from Model import *
 
-#     def train(self,"filename"):
+class Policy():
+    def __init__(self):
+        self.policy=Model(50,2,512,512,64)
+        PATH='Checkpoint.pth'
+        self.policy.load_state_dict(torch.load(PATH))
+        self.policy.eval()
 
-#     def forward(self, x):
-#         x = F.relu(self.fc1(x))
-#         x = self.fc2(x)
-#         return F.softmax(x, dim=1)
-    
-#     def act(self, state):
-#         state = torch.from_numpy(state).float().unsqueeze(0).to('cpu')
-#         probs = self.forward(state).cpu()
-#         m = Categorical(probs)
-#         action = torch.argmax(m.logits)
-#         return action.item(), m.log_prob(torch.tensor(action))
+    def act(self,lidarDepths,disAndAngle):
+        input1=torch.tensor([lidarDepths]).float()
+        input2=torch.tensor([disAndAngle]).float()
+        return self.policy.forward(input1,input2)

@@ -29,8 +29,9 @@ while running:
             break
 
     user_input=pygame.key.get_pressed()
-    if(user_input[pygame.K_UP] or user_input[pygame.K_w]):
+    if(user_input[pygame.K_UP] or user_input[pygame.K_w] or key%20==0):
         action=env.agentStates[0].selectAction()
+        print(action[0],action[1])
         reward=env.executeAction(action,0.2)
     
     env.render(screen)

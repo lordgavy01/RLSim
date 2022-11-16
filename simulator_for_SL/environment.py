@@ -70,7 +70,8 @@ class Environment:
             action=robotAction
             if not i==0:
                 action=self.agentStates[i].selectAction()
-            v=action[0]
+            # v=action[0]
+            v=2  #TODO:Uncomment this later
             w=action[1]
             if i==0:
                 r=random.uniform(-noise,noise)

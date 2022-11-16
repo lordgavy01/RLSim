@@ -1,5 +1,6 @@
 from util import *
 from planner import *
+from policyNN import *
 
 class AgentState:
 
@@ -10,10 +11,11 @@ class AgentState:
         self.distanceGoal=distanceGoal        
         self.thetaGoal=thetaGoal
         self.lidarData=lidarData
-        # self.policyNN=PolicyNN()
+        self.policyNN=Policy()
 
     # action --> (linearVelocity,angularVelocity)
     def selectAction(self):
-        bestAction=APF(self.distanceGoal,self.thetaGoal,self.lidarData)
-        # bestAction=self.policyNN.act(self.distanceGoal,self.thetaGoal,self.lidarData)
-        return bestAction
+        # bestAction=APF(self.distanceGoal,self.thetaGoal,self.lidarData)
+        lidarAngles,_=self.lidarData
+        bestAction=self.policyNN.act(lidarAngles,[self.distanceGoal,self.thetaGoal])
+        return bestAction[0].tolist()
