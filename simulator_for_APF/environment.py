@@ -42,8 +42,8 @@ class Environment:
         for i in range(len(lidarAngles)):
             curAngle=normalAngle(self.agentPoses[0][2]+lidarAngles[i])
             robotCoordinates=(self.agentPoses[0][0],self.agentPoses[0][1])
-            lidarHitpoint=(robotCoordinates[0]+lidarDepths[i]*cos(curAngle),
-                           robotCoordinates[1]+lidarDepths[i]*sin(curAngle))
+            lidarHitpoint=(robotCoordinates[0]+(lidarDepths[i]+self.agentRadius)*cos(curAngle),
+                           robotCoordinates[1]+(lidarDepths[i]+self.agentRadius)*sin(curAngle))
             if lidarDepths[i]>=1e9:
                 pygame.draw.line(screen,rayColors[0],robotCoordinates,lidarHitpoint)
             else: 

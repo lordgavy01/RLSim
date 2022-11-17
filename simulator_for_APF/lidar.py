@@ -24,7 +24,7 @@ def get_lidar_depths(index,agentPoses,agentRadius,obstacles,max_lidar_distance,
         p=getLinesegmentsIntersection(checker_line,edge)
         if(p==False):
           continue
-        min_distance=min(min_distance,euclidean((agent_x,agent_y),p))
+        min_distance=min(min_distance,euclidean((agent_x,agent_y),p)-agentRadius)
     for i in range(len(agentPoses)):
       if i==index:
         continue
@@ -32,7 +32,7 @@ def get_lidar_depths(index,agentPoses,agentRadius,obstacles,max_lidar_distance,
       p=getLinesegmentCircleIntersection(checker_line,(agentPoses[i],agentRadius))
       if(p==False):
         continue
-      min_distance=min(min_distance,euclidean((agent_x,agent_y),p))
+      min_distance=min(min_distance,euclidean((agent_x,agent_y),p)-agentRadius)
     min_distance=min(min_distance,max_lidar_distance)
     lidar_depths.append(min_distance)
   return lidar_angles,lidar_depths
