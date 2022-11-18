@@ -1,6 +1,6 @@
 from util import *
 
-def APF(distanceGoal,thetaGoal,lidarData,vmax=2,wmax=radians(20)):
+def APF(distanceGoal,thetaGoal,lidarData,oldV,vmax=2,wmax=radians(20)):
     lidarAngles,lidarDepths=lidarData
     
     # Attraction Modelling
@@ -33,6 +33,7 @@ def APF(distanceGoal,thetaGoal,lidarData,vmax=2,wmax=radians(20)):
     if abs(w)>wmax:
         w=wmax*(w/abs(w))
     v=min(kParam*fRes[0],vmax)
+    # v=min(max(oldV+kParam*fRes[0]*cos(fRes[1]),0),vmax)
 
     bestAction=(v,w)
     return bestAction

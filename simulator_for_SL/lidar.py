@@ -1,7 +1,7 @@
 from util import*
 
 def get_lidar_depths(index,agentPoses,agentRadius,obstacles,max_lidar_distance,
-                     field_of_view=radians(180),number_of_lidar_angles=50):
+                     field_of_view=FIELD_OF_VIEW,number_of_lidar_angles=NUMBER_OF_LIDAR_ANGLES):
   # Assuming agent_theta (with positive x-axis) and field_of_veiew are in radians
   agent_x,agent_y,agent_theta=agentPoses[index]
   lidar_angles=[]  

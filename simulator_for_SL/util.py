@@ -1,5 +1,7 @@
-import numpy as np
 from math import *
+from config import *
+
+import numpy as np
 import pygame
 import os
 import random
@@ -15,12 +17,12 @@ class Background(pygame.sprite.Sprite):
 
 INF=1e18
 
-image_name='map.png'
+image_name=MAP_IMAGE_FILENAME
 mapBackground=Background(image_name,[0,0])
 Polygons=[]
 
 def initMap():
-    with open('map_obstacles.txt') as file:
+    with open(MAP_OBSTACLES_FILENAME) as file:
         for line in file:
             line_data=[int(x) for x in line.split()]
             polygon=[]

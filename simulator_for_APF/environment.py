@@ -49,7 +49,9 @@ class Environment:
             else: 
                 pygame.draw.line(screen,rayColors[1],robotCoordinates,lidarHitpoint)    
 
-    def updateAgentStates(self):
+    def updateAgentStates(self,agentVelocities=[]):
+        if(len(agentVelocities)==0):
+            agentVelocities=[0 for i in range(len(self.agentSubGoals))]
         self.agentStates=[]
         for i in range(len(self.agentPoses)):
             lidarData=get_lidar_depths(i,self.agentPoses,self.agentRadius,self.obstacles,max_lidar_distance=1e9,
@@ -58,10 +60,14 @@ class Environment:
             goal=self.agentGoals[i]
             distanceGoal=euclidean((pose[0],pose[1]),(goal[0],goal[1]))
             thetaGoal=normalAngle(atan2(goal[1]-pose[1],goal[0]-pose[0])-pose[2])
-            self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData))
+            if not len(self.agentStates)==len(self.agentSubGoals):
+                self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData,agentVelocities[i]))
+            else:
+                self.agentStates[i].update(distanceGoal,thetaGoal,lidarData,agentVelocities[i])
     
     def executeAction(self,robotAction,noise=0):
         oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
+        agentVelocities=[]
         for i in range(len(self.agentPoses)):
             action=robotAction
             if not i==0:
@@ -69,9 +75,10 @@ class Environment:
             v=action[0]
             w=action[1]
             if i==0:
-                r=random.uniform(-noise,noise)
-                v=v*(1+noise)
-                w=normalAngle(w*(1+noise))
+                rnoise=random.uniform(-noise,noise)
+                v=min(max(v*(1+rnoise),0),2)
+                w=normalAngle(w*(1+rnoise))
+            agentVelocities.append(v)
             self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1) 
             if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<2:
                 if not (self.agentProgress[i]+1)==(len(self.agentSubGoals[i])-1):

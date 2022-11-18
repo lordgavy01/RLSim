@@ -29,7 +29,7 @@ while running:
     user_input=pygame.key.get_pressed()
     if(user_input[pygame.K_UP] or user_input[pygame.K_w]):
         action=env.agentStates[0].selectAction()
-        reward=env.executeAction(action,0.2)
+        reward=env.executeAction(action,0.0)
     
     env.render(screen)
     pygame.display.update()

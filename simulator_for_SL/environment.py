@@ -2,6 +2,7 @@ from util import *
 from agent import *
 from lidar import *
 from colors import *
+from config import *
 
 class Environment:
 
@@ -10,10 +11,7 @@ class Environment:
     # agentStates --> List of objects of class AgentState.
     # agent 0 is robot, others are humans 
     
-    def reset(self,obstacles=Polygons,agentRadius=10,agentSubGoals=[((91, 90,0),(201, 239),(543, 225,0),(619, 89,0)),
-                                                                ((645, 223,0),(449, 227,0)),
-                                                                ((666, 454,0),(71, 288,0)),
-                                                                ((381, 95,0),(251, 249,0))]):
+    def reset(self,obstacles=Polygons,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS):
         self.obstacles=obstacles
         self.agentStates=[]
         self.agentSubGoals=agentSubGoals
@@ -21,17 +19,11 @@ class Environment:
         self.agentProgress=[0]*len(agentSubGoals)
         self.agentPoses=[]
         self.agentGoals=[]
-        # self.agentVOld=[]
-        # self.agentThetaOld=[]
         for agent in agentSubGoals:
             self.agentPoses.append(agent[0])
             self.agentGoals.append(agent[1])
         self.updateAgentStates()
     
-    # def addAgent(self,agentPose,agentGoal):
-    #     self.agentPoses.append(agentPose)
-    #     self.agentGoals.append(agentGoal)
-
     def render(self,screen):
         agentColors=[Colors.red,Colors.blue,Colors.cyan,Colors.yellow,Colors.green]
         for i in range(len(self.agentPoses)):
@@ -51,40 +43,41 @@ class Environment:
             else: 
                 pygame.draw.line(screen,rayColors[1],robotCoordinates,lidarHitpoint)    
 
-    def updateAgentStates(self):
-        self.agentStates=[]
+    def updateAgentStates(self,agentVelocities=[]):
+        if(len(agentVelocities)==0):
+            agentVelocities=[0 for i in range(len(self.agentSubGoals))]
         for i in range(len(self.agentPoses)):
-            lidarData=get_lidar_depths(i,self.agentPoses,self.agentRadius,self.obstacles,max_lidar_distance=1e9,
-                                       field_of_view=radians(180),number_of_lidar_angles=50)
+            lidarData=get_lidar_depths(i,self.agentPoses,self.agentRadius,self.obstacles,max_lidar_distance=MAX_LIDAR_DISTANCE,
+                                       field_of_view=FIELD_OF_VIEW,number_of_lidar_angles=NUMBER_OF_LIDAR_ANGLES)
             pose=self.agentPoses[i]
             goal=self.agentGoals[i]
             distanceGoal=euclidean((pose[0],pose[1]),(goal[0],goal[1]))
             thetaGoal=normalAngle(atan2(goal[1]-pose[1],goal[0]-pose[0])-pose[2])
-            self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData))
+            if not len(self.agentStates)==len(self.agentSubGoals):
+                self.agentStates.append(AgentState(distanceGoal,thetaGoal,lidarData,agentVelocities[i]))
+            else:
+                self.agentStates[i].update(distanceGoal,thetaGoal,lidarData,agentVelocities[i])
     
-    def executeAction(self,robotAction,noise=0):
+    def executeAction(self,robotAction,noise=NOISE):
         oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
-        self.agentVOld=[]
-        self.agentThetaOld=[]
+        agentVelocities=[]
         for i in range(len(self.agentPoses)):
             action=robotAction
             if not i==0:
                 action=self.agentStates[i].selectAction()
             v=action[0]
-            # v=2  #TODO:Uncomment this later
             w=action[1]
             if i==0:
-                r=random.uniform(-noise,noise)
-                v=v*(1+noise)
-                w=normalAngle(w*(1+noise))
+                rnoise=random.uniform(-noise,noise)
+                v=min(max(v*(1+rnoise),0),VMAX)
+                w=normalAngle(w*(1+rnoise))
+            agentVelocities.append(v)
             self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1) 
-            # self.agentVOld.append(v)
-            # self.agentThetaOld.append(self.agentPoses[i][2])
             if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<2:
                 if not (self.agentProgress[i]+1)==(len(self.agentSubGoals[i])-1):
                     self.agentProgress[i]+=1
                     self.agentGoals[i]=self.agentSubGoals[i][self.agentProgress[i]+1]
-        self.updateAgentStates()        
+        self.updateAgentStates(agentVelocities)        
         newEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
         return Environment.rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState)
     
