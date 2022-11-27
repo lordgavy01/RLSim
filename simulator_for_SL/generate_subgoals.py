@@ -21,7 +21,7 @@ while running:
             break
         if event.type==pygame.MOUSEBUTTONDOWN:
             pos=pygame.mouse.get_pos()
-            pygame.draw.circle(screen,agentColors[len(allAgentSubGoals)],center=pos,radius=AGENT_RADIUS,width=2)
+            pygame.draw.circle(screen,agentColors[len(allAgentSubGoals)],pos,AGENT_RADIUS,2)
             pygame.display.update()
             curAgentSubGoal.append((pos[0],pos[1],0))
             print(pos)

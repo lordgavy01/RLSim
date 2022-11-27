@@ -7,8 +7,8 @@ from config import *
 
 pygame.init()
 pygame.display.set_caption("Reactive Multi-Robot Navigation")
-obstacles=initMap(mapObstaclesFilename="map_obstacles.txt")
-mapBackground=getMapBackground(mapImageFilename="map.png")
+obstacles=initMap(mapObstaclesFilename="small_map_obstacles.txt")
+mapBackground=getMapBackground(mapImageFilename="small_map.png")
 
 running=True
 key=0
@@ -16,7 +16,7 @@ screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.im
 print("Map Dimensions:",(mapBackground.image.get_width(),mapBackground.image.get_height()))
 
 env=Environment()
-env.reset(obstacles=obstacles)
+env.reset(obstacles=obstacles,agentSubGoals=AGENT_SUBGOALS2)
 
 while running:
     screen.blit(mapBackground.image, mapBackground.rect)

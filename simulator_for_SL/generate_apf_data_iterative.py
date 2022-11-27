@@ -16,11 +16,10 @@ with open(filename,'w') as csvfile:
 
 obstacles=initMap(mapObstaclesFilename="small_map_obstacles.txt")
 mapBackground=getMapBackground(mapImageFilename="map.png")
-NUM_ITERATIONS=5
+NUM_ITERATIONS=1000
 for i in range(NUM_ITERATIONS):
     
     print(f"\n***Iteration {i}***")
-    initMap()
     env=Environment()
     env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
     print("Initialized map.")
@@ -34,7 +33,7 @@ for i in range(NUM_ITERATIONS):
             env.agentStates[0].distanceGoal,
             env.agentStates[0].thetaGoal,
             ]+env.agentStates[0].lidarData[1]
-        reward=env.executeAction(action,NOISE)
+        reward=env.executeAction(action,noise=0.4)
 
         if(env.getAgentClearances()[0]==-1):
             print(env.getAgentClearances())
@@ -57,14 +56,13 @@ for i in range(NUM_ITERATIONS):
             break
 
         if(env.agentProgress[0]>lastProgress):
-            print(f"Robot progressed to Sub Goal {env.agentProgress[0]} / {len(env.agentSubGoals[0])-1}.")
-            lastProgress=env.agentProgress[0]
+            lastProgress+=1
+            print(f"Robot progressed to Sub Goal {lastProgress} / {len(env.agentSubGoals[0])-1}.")
 
         if(abs(row[1])<abs(radians(1))):
             epsilon=random.uniform(0,1)
-            if(epsilon<=0.2):
+            if(epsilon<=0.1):
                 rows.append(row)
-
 
         if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<2:
             if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
