@@ -10,6 +10,7 @@ pygame.display.set_caption("Reactive Multi-Robot Navigation")
 obstacles=initMap(mapObstaclesFilename="small_map_obstacles.txt")
 mapBackground=getMapBackground(mapImageFilename="small_map.png")
 
+apfDataFilename=APF_DATA_FILENAME
 running=True
 key=0
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
@@ -28,7 +29,8 @@ while running:
 
     user_input=pygame.key.get_pressed()
     if(user_input[pygame.K_UP] or user_input[pygame.K_w] or key%20==0):
-        action=env.agentStates[0].selectAction("NN")
+        action=env.agentStates[0].selectAction("NN",apfDataFilename)
+        print(action)
         reward=env.executeAction(action,NOISE)
     
     env.render(screen)

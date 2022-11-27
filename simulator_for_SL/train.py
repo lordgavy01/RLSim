@@ -19,10 +19,10 @@ class LidarDataset(torch.utils.data.Dataset):
         return len(self.encodings['X1'])
 
 class MyTrainer:
-    def __init__(self,filename,policy):
+    def __init__(self,filename,model):
         self.trainDF=pd.read_csv(filename)
         self.cleanDataset()
-        self.policy=policy
+        self.model=model
     def cleanDataset(self):
         inputs=defaultdict(list)
         for i in range(len(self.trainDF)):
@@ -42,7 +42,7 @@ class MyTrainer:
     def trainDataset(self):
         # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         device = torch.device('cpu')
-        self.model=self.policy.to(device)
+        self.model=self.model.to(device)
         LearningRate=1e-3
         Epochs=10
 

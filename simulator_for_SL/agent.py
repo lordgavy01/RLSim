@@ -1,6 +1,6 @@
 from util import *
 from planner import *
-from policyNN import *
+from policy import *
 
 class AgentState:
 
@@ -20,13 +20,13 @@ class AgentState:
         self.velocity=velocity
 
     # action --> (linearVelocity,angularVelocity)
-    def selectAction(self,policy="APF"):
+    def selectAction(self,policy="APF",apfDataFilename="apf_data.csv"):
         if policy=="APF":
             bestAction=APF(self.distanceGoal,self.thetaGoal,self.lidarData,self.velocity)
         elif policy=="NN":
-            if not hasattr(self,"policyNN"):
-                self.policyNN=Policy()
+            if not hasattr(self,"policy"):
+                self.policy=Policy(apfDataFilename)
             lidarAngles,_=self.lidarData
-            bestAction=self.policyNN.act(lidarAngles,[self.distanceGoal,self.thetaGoal])
+            bestAction=self.policy.act(lidarAngles,[self.distanceGoal,self.thetaGoal])
             bestAction=bestAction[0].tolist()
         return bestAction
