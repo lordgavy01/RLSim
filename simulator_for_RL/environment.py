@@ -33,10 +33,10 @@ class Environment:
     def render(self,screen):
         agentColors=[Colors.red,Colors.blue,Colors.cyan,Colors.yellow,Colors.green]
         for i in range(len(self.agentPoses)):
-            agentCoordinates=(self.agentPoses[i][0],self.agentPoses[i][1])
-            goalCoordinates=(self.agentGoals[i][0],self.agentGoals[i][1])
-            pygame.draw.circle(screen,agentColors[i],center=agentCoordinates,radius=self.agentRadius)
-            pygame.draw.circle(screen,agentColors[i],center=goalCoordinates,radius=self.agentRadius,width=2)            
+            agentCoordinates=(int(self.agentPoses[i][0]),int(self.agentPoses[i][1]))
+            goalCoordinates=(int(self.agentGoals[i][0]),int(self.agentGoals[i][1]))
+            pygame.draw.circle(screen,agentColors[i],agentCoordinates,self.agentRadius)
+            pygame.draw.circle(screen,agentColors[i],goalCoordinates,self.agentRadius,2)            
         rayColors=[Colors.green,Colors.blue]
         lidarAngles,lidarDepths=self.agentStates[0].lidarData
         for i in range(len(lidarAngles)):

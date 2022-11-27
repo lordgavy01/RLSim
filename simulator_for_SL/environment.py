@@ -11,7 +11,7 @@ class Environment:
     # agentStates --> List of objects of class AgentState.
     # agent 0 is robot, others are humans 
     
-    def reset(self,obstacles=Polygons,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS):
+    def reset(self,obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS):
         self.obstacles=obstacles
         self.agentStates=[]
         self.agentSubGoals=agentSubGoals
@@ -27,10 +27,10 @@ class Environment:
     def render(self,screen):
         agentColors=[Colors.red,Colors.blue,Colors.cyan,Colors.yellow,Colors.green]
         for i in range(len(self.agentPoses)):
-            agentCoordinates=(self.agentPoses[i][0],self.agentPoses[i][1])
-            goalCoordinates=(self.agentGoals[i][0],self.agentGoals[i][1])
-            pygame.draw.circle(screen,agentColors[i],center=agentCoordinates,radius=self.agentRadius)
-            pygame.draw.circle(screen,agentColors[i],center=goalCoordinates,radius=self.agentRadius,width=2)            
+            agentCoordinates=(int(self.agentPoses[i][0]),int(self.agentPoses[i][1]))
+            goalCoordinates=(int(self.agentGoals[i][0]),int(self.agentGoals[i][1]))
+            pygame.draw.circle(screen,agentColors[i],agentCoordinates,self.agentRadius)
+            pygame.draw.circle(screen,agentColors[i],goalCoordinates,self.agentRadius,2)            
         rayColors=[Colors.green,Colors.blue]
         lidarAngles,lidarDepths=self.agentStates[0].lidarData
         for i in range(len(lidarAngles)):
@@ -83,3 +83,30 @@ class Environment:
     
     def rewardFunction(oldEnvironmentState,robotAction,newEnvironmentState):
         return 0
+    
+    # NOTE: Would fail to detect collision if agent is completely inside obstacle
+    def getAgentClearances(self):
+        agentClearances=[]
+        for agentId in range(len(self.agentSubGoals)):
+            agentClearance=INF
+            center=(self.agentPoses[agentId][0],self.agentPoses[agentId][1])
+            radius=self.agentRadius
+            for obstacle in self.obstacles:
+                for i in range(len(obstacle)):
+                    edge=(obstacle[i],obstacle[(i+1)%len(obstacle)])
+                    d=getDistancePointLineSegment(center,edge)
+                    if(d-radius<=0): 
+                        agentClearance=-1
+                    else: 
+                        agentClearance=min(agentClearance,d-radius)
+            for j in range(len(self.agentSubGoals)):
+                if (agentId==j): continue
+                center2=(self.agentPoses[j][0],self.agentPoses[j][1])
+                radius2=self.agentRadius
+                d=euclidean(center,center2)
+                if(d-radius-radius2<=0): 
+                    agentClearance=-1
+                else: 
+                    agentClearance=min(agentClearance,d-radius-radius2)
+            agentClearances.append(agentClearance)
+        return agentClearances

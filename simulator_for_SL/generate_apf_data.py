@@ -4,18 +4,18 @@ from planner import *
 from environment import *
 from agent import *
 from config import *
-
 import csv
 
 pygame.init()
 pygame.display.set_caption("Reactive Multi-Robot Navigation")
+mapBackground=getMapBackground(mapImageFilename="small_map.png")
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
 screen.blit(mapBackground.image, mapBackground.rect)
 pygame.display.update()
 
-initMap()
+obstacles=initMap(mapObstaclesFilename="small_map_obstacles.txt")
 env=Environment()
-env.reset(obstacles=Polygons,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
+env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
 
 running=True
 key=0

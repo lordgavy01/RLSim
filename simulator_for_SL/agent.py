@@ -12,7 +12,6 @@ class AgentState:
         self.thetaGoal=thetaGoal
         self.lidarData=lidarData
         self.velocity=velocity
-        self.policyNN=Policy()
     
     def update(self,distanceGoal,thetaGoal,lidarData,velocity):
         self.distanceGoal=distanceGoal        
@@ -25,6 +24,8 @@ class AgentState:
         if policy=="APF":
             bestAction=APF(self.distanceGoal,self.thetaGoal,self.lidarData,self.velocity)
         elif policy=="NN":
+            if not hasattr(self,"policyNN"):
+                self.policyNN=Policy()
             lidarAngles,_=self.lidarData
             bestAction=self.policyNN.act(lidarAngles,[self.distanceGoal,self.thetaGoal])
             bestAction=bestAction[0].tolist()

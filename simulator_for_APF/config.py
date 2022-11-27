@@ -1,9 +1,9 @@
 from math import *
 
-MAP_IMAGE_FILENAME="map.png"
-MAP_OBSTACLES_FILENAME="map_obstacles.txt"
+# MAP_IMAGE_FILENAME="map.png"
+# MAP_OBSTACLES_FILENAME="map_obstacles.txt"
 
-NOISE=0.2
+NOISE=0.0
 
 AGENT_RADIUS=10
 AGENT_SUBGOALS=[((91, 90,0),(201, 239),(543, 225,0),(619, 89,0)),

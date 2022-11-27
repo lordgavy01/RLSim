@@ -24,12 +24,13 @@ while running:
     for events in pygame.event.get():
         if events.type==pygame.QUIT:
             running=False
+            pygame.quit()
             break
 
     user_input=pygame.key.get_pressed()
-    if(user_input[pygame.K_UP] or user_input[pygame.K_w]):
+    if(user_input[pygame.K_UP] or user_input[pygame.K_w] or True):
         action=env.agentStates[0].selectAction()
-        reward=env.executeAction(action,0.0)
+        reward=env.executeAction(action,NOISE)
     
     env.render(screen)
     pygame.display.update()

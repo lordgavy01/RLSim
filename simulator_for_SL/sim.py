@@ -5,18 +5,18 @@ from environment import *
 from agent import *
 from config import *
 
-initMap()
 pygame.init()
 pygame.display.set_caption("Reactive Multi-Robot Navigation")
+obstacles=initMap(mapObstaclesFilename="map_obstacles.txt")
+mapBackground=getMapBackground(mapImageFilename="map.png")
 
 running=True
 key=0
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
-
 print("Map Dimensions:",(mapBackground.image.get_width(),mapBackground.image.get_height()))
 
 env=Environment()
-env.reset()
+env.reset(obstacles=obstacles)
 
 while running:
     screen.blit(mapBackground.image, mapBackground.rect)
@@ -28,7 +28,7 @@ while running:
 
     user_input=pygame.key.get_pressed()
     if(user_input[pygame.K_UP] or user_input[pygame.K_w] or key%20==0):
-        action=env.agentStates[0].selectAction()
+        action=env.agentStates[0].selectAction("NN")
         reward=env.executeAction(action,NOISE)
     
     env.render(screen)

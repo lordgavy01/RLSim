@@ -1,10 +1,11 @@
 from math import *
 from config import *
-
 import numpy as np
 import pygame
 import os
 import random
+
+INF=1e18
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 np.random.seed(1)
@@ -15,20 +16,20 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
-INF=1e18
+def getMapBackground(mapImageFilename=MAP_IMAGE_FILENAME):
+    mapBackground=Background(mapImageFilename,[0,0])
+    return mapBackground
 
-image_name=MAP_IMAGE_FILENAME
-mapBackground=Background(image_name,[0,0])
-Polygons=[]
-
-def initMap():
-    with open(MAP_OBSTACLES_FILENAME) as file:
+def initMap(mapObstaclesFilename=MAP_OBSTACLES_FILENAME):
+    obstacles=[]
+    with open(mapObstaclesFilename) as file:
         for line in file:
             line_data=[int(x) for x in line.split()]
-            polygon=[]
+            obstacle=[]
             for i in range(0,len(line_data),2):
-                polygon.append((line_data[i],line_data[i+1]))
-                Polygons.append(polygon)
+                obstacle.append((line_data[i],line_data[i+1]))
+                obstacles.append(obstacle)
+    return obstacles
 
 def euclidean(A,B):
     return sqrt((A[0]-B[0])**2+(A[1]-B[1])**2)
@@ -102,3 +103,21 @@ def getLinesegmentCircleIntersection(line1,circle):
     if euclidean(p1,inter_p1)<euclidean(p1,inter_p2):
         return inter_p1
     return inter_p2
+
+def getDistancePointLineSegment(point,line_segment):
+    ((x1,y1),(x2,y2))=line_segment
+    (x3,y3)=point
+    px = x2-x1
+    py = y2-y1
+    norm = px*px + py*py
+    u =  ((x3 - x1) * px + (y3 - y1) * py) / float(norm)
+    if u > 1:
+        u = 1
+    elif u < 0:
+        u = 0
+    x = x1 + u * px
+    y = y1 + u * py
+    dx = x - x3
+    dy = y - y3
+    dist = sqrt(dx*dx + dy*dy)
+    return dist
