@@ -30,7 +30,6 @@ while running:
     user_input=pygame.key.get_pressed()
     if(user_input[pygame.K_UP] or user_input[pygame.K_w] or key%20==0):
         action=env.agentStates[0].selectAction("NN",apfDataFilename)
-        print(action)
         reward=env.executeAction(action,NOISE)
     
     env.render(screen)

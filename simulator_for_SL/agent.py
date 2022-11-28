@@ -26,7 +26,7 @@ class AgentState:
         elif policy=="NN":
             if not hasattr(self,"policy"):
                 self.policy=Policy(apfDataFilename)
-            lidarAngles,_=self.lidarData
-            bestAction=self.policy.act(lidarAngles,[self.distanceGoal,self.thetaGoal])
+            _,lidarDepths=self.lidarData
+            bestAction=self.policy.act(lidarDepths,[self.distanceGoal,self.thetaGoal])
             bestAction=bestAction[0].tolist()
         return bestAction
