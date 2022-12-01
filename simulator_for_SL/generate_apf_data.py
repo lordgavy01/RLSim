@@ -14,9 +14,9 @@ with open(filename,'w') as csvfile:
     csvwriter = csv.writer(csvfile) 
     csvwriter.writerow(fields) 
 
-obstacles=initMap(mapObstaclesFilename="small_map_obstacles.txt")
-mapBackground=getMapBackground(mapImageFilename="map.png")
-NUM_ITERATIONS=1000
+obstacles=initMap(mapObstaclesFilename="Maps/small_map_obstacles.txt")
+mapBackground=getMapBackground(mapImageFilename="Maps/small_map.png")
+NUM_ITERATIONS=300
 for i in range(NUM_ITERATIONS):
     
     print(f"\n***Iteration {i}***")
@@ -61,8 +61,10 @@ for i in range(NUM_ITERATIONS):
 
         if(abs(row[1])<abs(radians(1))):
             epsilon=random.uniform(0,1)
-            if(epsilon<=0.1):
+            if(epsilon<=0.4):
                 rows.append(row)
+        else:
+            rows.append(row)
 
         if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<2:
             if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):

@@ -4,11 +4,8 @@ from train import MyTrainer
 
 
 class Policy():
-    def __init__(self,dataFilename):
-        self.dataFilename=dataFilename
+    def __init__(self):
         self.model=Model(50,2,512,512,64)
-        self.storeLearntWeightsFromData(dataFilename)
-        self.loadWeights()
 
     # Uses data in apf_data.csv to optimize weights of current NN model
     # The new learnt weights are written in file Checkpoint.pth

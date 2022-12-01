@@ -24,7 +24,7 @@ class Environment:
             self.agentGoals.append(agent[1])
         self.updateAgentStates()
     
-    def render(self,screen):
+    def render(self,screen,robotColor=(255,0,0)):
         agentColors=[Colors.red,Colors.blue,Colors.cyan,Colors.yellow,Colors.green]
         for i in range(len(self.agentPoses)):
             agentCoordinates=(int(self.agentPoses[i][0]),int(self.agentPoses[i][1]))
