@@ -14,7 +14,6 @@ USE_CHECKPOINT=True
 GOAL_DISTANCE_THRESHOLD=6
 
 pygame.init()
-pygame.display.set_caption("Reactive Multi-Robot Navigation")
 obstacles=initMap(mapObstaclesFilename=f"Maps/{MAP_NAME}_obstacles.txt")
 mapBackground=getMapBackground(mapImageFilename=f"Maps/{MAP_NAME}.png")
 
@@ -36,6 +35,7 @@ for i in range(1,1+NUM_ITERATIONS):
     print(f"\n***Iteration {i}***")
     env=Environment()
     env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
+    pygame.display.set_caption(f"DAgger: Iteration {i}")
     screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
     print("Initialized map.")
 
@@ -55,11 +55,14 @@ for i in range(1,1+NUM_ITERATIONS):
 
     rows=[]
     running=True
-    collisionFlag=False
     lastProgress=0
-    ctr=0
     isApfOn=0
     robotColor=(255,0,0)
+
+    collisionFlag=False
+    numTimestamps=0
+    pathClearance=INF
+    
     while running:
         screen.blit(mapBackground.image, mapBackground.rect)
         for event in pygame.event.get():
@@ -92,20 +95,25 @@ for i in range(1,1+NUM_ITERATIONS):
         # time.sleep(0.05)
         pygame.display.update()
 
+        numTimestamps+=1
+        pathClearance=min(pathClearance,env.getAgentClearances()[0])
+
         if(env.getAgentClearances()[0]==-1):
             print(env.getAgentClearances())
             print("Robot Collided!!!")
             collisionFlag=True
             break
         
-        if(ctr>500):
+        if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<GOAL_DISTANCE_THRESHOLD:
+            if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
+                print("Robot reached Goal!")
+                running=False
+                break
+        
+        if(numTimestamps>500):
             print("Time Limit Exceeded")
             collisionFlag=True
             break
-
-        if(env.agentProgress[0]>lastProgress):
-            lastProgress+=1
-            print(f"Robot progressed to Sub Goal {lastProgress} / {len(env.agentSubGoals[0])-1}.")
 
         if(abs(row[1])<abs(radians(1))):
             epsilon=random.uniform(0,1)
@@ -114,12 +122,11 @@ for i in range(1,1+NUM_ITERATIONS):
         else:
             rows.append(row)
 
-        if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<GOAL_DISTANCE_THRESHOLD:
-            if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
-                print("Robot reached Goal!")
-                running=False
-                break
-        ctr+=1
+    if not collisionFlag:
+        print()
+        print(f"Number of timestamps: {numTimestamps}")
+        print(f"Path Clearance: {pathClearance}")
+        print(f"Number of learning iterations: {i}")
 
     if not running:
         break

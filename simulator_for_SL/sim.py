@@ -9,9 +9,10 @@ MAP_NAME="small_map"
 APF_DATA_ITER=300
 APF_DATA_NO_ROTATE_KEEP=0.4
 USE_CHECKPOINT=True
+GOAL_DISTANCE_THRESHOLD=6
 
 pygame.init()
-pygame.display.set_caption("Reactive Multi-Robot Navigation")
+pygame.display.set_caption("APF")
 obstacles=initMap(mapObstaclesFilename=f"Maps/{MAP_NAME}_obstacles.txt")
 mapBackground=getMapBackground(mapImageFilename=f"Maps/{MAP_NAME}.png")
 
@@ -33,20 +34,48 @@ else:
     policy.storeLearntWeightsFromData(apfDataFilename,checkpointFilename)
     policy.loadWeights(checkpointFilename)
 
+collisionFlag=False
+numTimestamps=0
+pathClearance=INF
+controlKey=0
+
 while running:
+    controlKey+=1
     screen.blit(mapBackground.image, mapBackground.rect)
     for events in pygame.event.get():
         if events.type==pygame.QUIT:
             running=False
             pygame.quit()
             break
-
-    user_input=pygame.key.get_pressed()
-    if(user_input[pygame.K_UP] or user_input[pygame.K_w] or key%1==0):
-        action=env.agentStates[0].selectAction("NN",policy)
-        # action=env.agentStates[0].selectAction("APF")
-        reward=env.executeAction(action,noise=0.1,goalDistanceThreshold=6)
     
-    env.render(screen)
-    pygame.display.update()
-    key+=1
+    if(controlKey%10==0):
+        # action=env.agentStates[0].selectAction("NN",policy)
+        action=env.agentStates[0].selectAction("APF")
+        reward=env.executeAction(action,noise=0.1,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
+        env.render(screen)
+        pygame.display.update()
+        
+        numTimestamps+=1
+        pathClearance=min(pathClearance,env.getAgentClearances()[0])
+
+        if(env.getAgentClearances()[0]==-1):
+            print(env.getAgentClearances())
+            print("Robot Collided!!!")
+            collisionFlag=True
+            break
+        
+        if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<GOAL_DISTANCE_THRESHOLD:
+            if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
+                print("Robot reached Goal!")
+                running=False
+                break
+        
+        if(numTimestamps>500):
+            print("Time Limit Exceeded")
+            collisionFlag=True
+            break
+
+if not collisionFlag:
+    print()
+    print(f"Number of timestamps: {numTimestamps}")
+    print(f"Path Clearance: {pathClearance}")
