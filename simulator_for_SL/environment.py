@@ -58,7 +58,7 @@ class Environment:
             else:
                 self.agentStates[i].update(distanceGoal,thetaGoal,lidarData,agentVelocities[i])
     
-    def executeAction(self,robotAction,noise=NOISE):
+    def executeAction(self,robotAction,noise=NOISE,goalDistanceThreshold=2):
         oldEnvironmentState=(self.obstacles,self.agentPoses,self.agentGoals,self.agentStates)
         agentVelocities=[]
         for i in range(len(self.agentPoses)):
@@ -73,7 +73,7 @@ class Environment:
                 w=normalAngle(w*(1+rnoise))
             agentVelocities.append(v)
             self.agentPoses[i]=kinematic_equation(self.agentPoses[i],v,w,dT=1) 
-            if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<2:
+            if euclidean((self.agentPoses[i][0],self.agentPoses[i][1]),(self.agentGoals[i][0],self.agentGoals[i][1]))<goalDistanceThreshold:
                 if not (self.agentProgress[i]+1)==(len(self.agentSubGoals[i])-1):
                     self.agentProgress[i]+=1
                     self.agentGoals[i]=self.agentSubGoals[i][self.agentProgress[i]+1]

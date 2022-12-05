@@ -6,18 +6,23 @@ from agent import *
 from config import *
 import csv
 
-filename = APF_DATA_FILENAME
+MAP_NAME="small_map"
+NUM_ITERATIONS=300
+NO_ROTATE_KEEP=0.4
+APF_DATA_NOISE=0.4
+
+filename = f"Datasets/apf_data_{MAP_NAME}_{NUM_ITERATIONS}_{NO_ROTATE_KEEP}.csv"
+obstacles=initMap(mapObstaclesFilename=f"Maps/{MAP_NAME}_obstacles.txt")
+mapBackground=getMapBackground(mapImageFilename=f"Maps/{MAP_NAME}.png")
+
 fields=["output_linear_velocity","output_angular_velocity","distance_from_goal","angle_from_goal"]
 fields+=[f"lidar_depth_{i}" for i in range(1,1+NUMBER_OF_LIDAR_ANGLES)]
-rows=[]
 with open(filename,'w') as csvfile: 
     csvwriter = csv.writer(csvfile) 
-    csvwriter.writerow(fields) 
+    csvwriter.writerow(fields)
+rows=[] 
 
-obstacles=initMap(mapObstaclesFilename="Maps/small_map_obstacles.txt")
-mapBackground=getMapBackground(mapImageFilename="Maps/small_map.png")
-NUM_ITERATIONS=300
-for i in range(NUM_ITERATIONS):
+for i in range(1,1+NUM_ITERATIONS):
     
     print(f"\n***Iteration {i}***")
     env=Environment()
@@ -33,7 +38,7 @@ for i in range(NUM_ITERATIONS):
             env.agentStates[0].distanceGoal,
             env.agentStates[0].thetaGoal,
             ]+env.agentStates[0].lidarData[1]
-        reward=env.executeAction(action,noise=0.4)
+        reward=env.executeAction(action,noise=APF_DATA_NOISE)
 
         if(env.getAgentClearances()[0]==-1):
             print(env.getAgentClearances())
@@ -61,18 +66,18 @@ for i in range(NUM_ITERATIONS):
 
         if(abs(row[1])<abs(radians(1))):
             epsilon=random.uniform(0,1)
-            if(epsilon<=0.4):
+            if(epsilon<=NO_ROTATE_KEEP):
                 rows.append(row)
         else:
             rows.append(row)
 
         if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<2:
             if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
+                print("Robot reached goal!")
                 running=False
                 break
     
     if not collisionFlag:
-        print("Robot reached final goal!")
         print(f"Adding {len(rows)} rows to database.")
         with open(filename,'a') as csvfile: 
             csvwriter = csv.writer(csvfile)

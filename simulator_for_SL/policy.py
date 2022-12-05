@@ -1,4 +1,4 @@
-from Model import *
+from model import *
 from config import *
 from train import MyTrainer
 
@@ -9,14 +9,14 @@ class Policy():
 
     # Uses data in apf_data.csv to optimize weights of current NN model
     # The new learnt weights are written in file Checkpoint.pth
-    def storeLearntWeightsFromData(self,dataFilename=APF_DATA_FILENAME):
+    def storeLearntWeightsFromData(self,dataFilename="apf_data.csv",checkpointFilename="checkpoint.pth"):
         trainer=MyTrainer(dataFilename,self.model)
-        trainer.trainDataset()
+        trainer.trainDataset(checkpointFilename)
     
     # Uses data in apf_data.csv to optimize weights of current NN model
     # The new learnt weights are written in file Checkpoint.pth
-    def loadWeights(self,weightsFilename='Checkpoint.pth'):
-        self.model.load_state_dict(torch.load(weightsFilename))
+    def loadWeights(self,checkpointFilename='checkpoint.pth'):
+        self.model.load_state_dict(torch.load(checkpointFilename))
         self.model.eval()
 
     def act(self,lidarDepths,disAndAngle):

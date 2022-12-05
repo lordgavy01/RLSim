@@ -39,7 +39,7 @@ class MyTrainer:
         self.dataset=LidarDataset(inputs)   
         self.loader=torch.utils.data.DataLoader(self.dataset, batch_size=64, shuffle=True,pin_memory=True)
     
-    def trainDataset(self):
+    def trainDataset(self,checkpointFilename):
         # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         device = torch.device('cpu')
         self.model=self.model.to(device)
@@ -101,12 +101,12 @@ class MyTrainer:
             epochLoss = runningLoss / len(self.loader)
         
             print("-> Training time: {:.4f}s, loss = {:.4f} ".format(epochTime, epochLoss)) 
-        self.saveCheckpoint()
+        self.saveCheckpoint(checkpointFilename)
         self.saveLearningCurves(train_loss)
     
-    def saveCheckpoint(self):
+    def saveCheckpoint(self,checkpointFilename):
         checkpoint=self.model.state_dict()
-        PATH='Checkpoint.pth'
+        PATH=checkpointFilename
         torch.save(checkpoint,PATH)
         print('Checkpoint Saved Successfuly')
 
