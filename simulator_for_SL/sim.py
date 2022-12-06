@@ -37,6 +37,7 @@ else:
 collisionFlag=False
 numTimestamps=0
 pathClearance=INF
+sumGoalDistance=0
 controlKey=0
 
 while running:
@@ -57,6 +58,8 @@ while running:
         
         numTimestamps+=1
         pathClearance=min(pathClearance,env.getAgentClearances()[0])
+        goalDistance=euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))
+        sumGoalDistance+=goalDistance
 
         if(env.getAgentClearances()[0]==-1):
             print(env.getAgentClearances())
@@ -64,7 +67,7 @@ while running:
             collisionFlag=True
             break
         
-        if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<GOAL_DISTANCE_THRESHOLD:
+        if goalDistance<GOAL_DISTANCE_THRESHOLD:
             if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
                 print("Robot reached Goal!")
                 running=False
@@ -79,3 +82,4 @@ if not collisionFlag:
     print()
     print(f"Number of timestamps: {numTimestamps}")
     print(f"Path Clearance: {pathClearance}")
+    print(f"Average Goal Distance along Path: {sumGoalDistance/numTimestamps}")

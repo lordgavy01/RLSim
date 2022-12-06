@@ -6,6 +6,7 @@ from agent import *
 from config import *
 import csv
 import time
+import matplotlib.pyplot as plt
 
 MAP_NAME="small_map"
 APF_DATA_ITER=300
@@ -29,8 +30,13 @@ with open(tempDataFilename,'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(fields)
 
+pathNumTimestamps=[]
+pathClearances=[]
+pathAvgGoalDistances=[]
+
+keepIterating=True
 policy=Policy()
-NUM_ITERATIONS=30
+NUM_ITERATIONS=20
 for i in range(1,1+NUM_ITERATIONS):  
     print(f"\n***Iteration {i}***")
     env=Environment()
@@ -62,13 +68,14 @@ for i in range(1,1+NUM_ITERATIONS):
     collisionFlag=False
     numTimestamps=0
     pathClearance=INF
+    sumGoalDistance=0
     
     while running:
         screen.blit(mapBackground.image, mapBackground.rect)
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 running=False
-                pygame.quit()
+                keepIterating=False
                 break
             if event.type==pygame.KEYDOWN:
                 key_name=pygame.key.name(event.key)
@@ -92,11 +99,12 @@ for i in range(1,1+NUM_ITERATIONS):
             ]+env.agentStates[0].lidarData[1]
         reward=env.executeAction(action,noise=0.1,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
         env.render(screen,robotColor)
-        # time.sleep(0.05)
         pygame.display.update()
 
         numTimestamps+=1
         pathClearance=min(pathClearance,env.getAgentClearances()[0])
+        goalDistance=euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))
+        sumGoalDistance+=goalDistance
 
         if(env.getAgentClearances()[0]==-1):
             print(env.getAgentClearances())
@@ -104,13 +112,13 @@ for i in range(1,1+NUM_ITERATIONS):
             collisionFlag=True
             break
         
-        if euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))<GOAL_DISTANCE_THRESHOLD:
+        if goalDistance<GOAL_DISTANCE_THRESHOLD:
             if (env.agentProgress[0]+1)==(len(env.agentSubGoals[0])-1):
                 print("Robot reached Goal!")
                 running=False
                 break
         
-        if(numTimestamps>500):
+        if(numTimestamps>400):
             print("Time Limit Exceeded")
             collisionFlag=True
             break
@@ -122,18 +130,29 @@ for i in range(1,1+NUM_ITERATIONS):
         else:
             rows.append(row)
 
+    if not keepIterating:
+        break
+
     if not collisionFlag:
         print()
         print(f"Number of timestamps: {numTimestamps}")
         print(f"Path Clearance: {pathClearance}")
+        print(f"Average Goal Distance along Path: {sumGoalDistance/numTimestamps}")
         print(f"Number of learning iterations: {i}")
-
-    if not running:
-        break
+        pathNumTimestamps.append(numTimestamps)
+        pathClearances.append(pathClearance)
+        pathAvgGoalDistances.append(sumGoalDistance/numTimestamps)
+    else:
+        pathNumTimestamps.append(INF)
+        pathClearances.append(0)
+        pathAvgGoalDistances.append(sumGoalDistance/numTimestamps)
     
     print(f"Adding {len(rows)} rows to database.")
     with open(tempDataFilename,'a') as csvfile: 
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(rows)
-        
-        
+
+print()
+print(pathNumTimestamps)
+print(pathClearances)   
+print(pathAvgGoalDistances)    
