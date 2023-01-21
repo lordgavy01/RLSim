@@ -6,7 +6,7 @@ from agent import *
 from config import *
 import csv
 
-MAP_NAME="small_map"
+MAP_NAME="map3"
 NUM_ITERATIONS=300
 NO_ROTATE_KEEP=0.4
 APF_DATA_NOISE=0.4
@@ -26,7 +26,7 @@ for i in range(1,1+NUM_ITERATIONS):
     
     print(f"\n***Iteration {i}***")
     env=Environment()
-    env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
+    env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS5)
     print("Initialized map.")
 
     running=True

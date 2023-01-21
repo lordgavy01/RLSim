@@ -4,8 +4,9 @@ from planner import *
 from environment import *
 from agent import *
 from config import *
+import time
 
-MAP_NAME="small_map"
+MAP_NAME="map3"
 APF_DATA_ITER=300
 APF_DATA_NO_ROTATE_KEEP=0.4
 USE_CHECKPOINT=True
@@ -21,18 +22,22 @@ checkpointFilename= f"Checkpoints/checkpoint_{MAP_NAME}_{APF_DATA_ITER}_{APF_DAT
 
 policy=Policy()
 env=Environment()
-env.reset(obstacles=obstacles,agentSubGoals=AGENT_SUBGOALS)
+env.reset(obstacles=obstacles,agentSubGoals=AGENT_SUBGOALS5)
 
 running=True
 key=0
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
 print("Map Dimensions:",(mapBackground.image.get_width(),mapBackground.image.get_height()))
+screen.blit(mapBackground.image, mapBackground.rect)
+env.renderSubGoals(screen)
+pygame.display.update()
+time.sleep(10)
 
-if USE_CHECKPOINT:
-    policy.loadWeights(checkpointFilename)
-else:
-    policy.storeLearntWeightsFromData(apfDataFilename,checkpointFilename)
-    policy.loadWeights(checkpointFilename)
+# if USE_CHECKPOINT:
+#     policy.loadWeights(checkpointFilename)
+# else:
+#     policy.storeLearntWeightsFromData(apfDataFilename,checkpointFilename)
+#     policy.loadWeights(checkpointFilename)
 
 collisionFlag=False
 numTimestamps=0
@@ -46,7 +51,6 @@ while running:
     for events in pygame.event.get():
         if events.type==pygame.QUIT:
             running=False
-            pygame.quit()
             break
     
     if(controlKey%10==0):

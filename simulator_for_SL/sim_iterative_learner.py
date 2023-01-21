@@ -8,15 +8,24 @@ import csv
 import time
 import matplotlib.pyplot as plt
 
-MAP_NAME="small_map"
+MAP_NAME="map3"
 APF_DATA_ITER=300
 APF_DATA_NO_ROTATE_KEEP=0.4
 USE_CHECKPOINT=True
 GOAL_DISTANCE_THRESHOLD=6
+AGENT_SUBGOALS=AGENT_SUBGOALS5
 
 pygame.init()
 obstacles=initMap(mapObstaclesFilename=f"Maps/{MAP_NAME}_obstacles.txt")
 mapBackground=getMapBackground(mapImageFilename=f"Maps/{MAP_NAME}.png")
+env=Environment()
+env.reset(obstacles=obstacles,agentRadius=AGENT_RADIUS,agentSubGoals=AGENT_SUBGOALS)
+pygame.display.set_caption(f"DAgger")
+screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
+screen.blit(mapBackground.image, mapBackground.rect)
+env.renderSubGoals(screen)
+pygame.display.update()
+time.sleep(5)
 
 apfDataFilename = f"Datasets/apf_data_{MAP_NAME}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.csv"
 checkpointFilename= f"Checkpoints/checkpoint_{MAP_NAME}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.pth"

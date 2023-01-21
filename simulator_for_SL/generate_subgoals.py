@@ -3,7 +3,7 @@ from colors import *
 
 pygame.init()
 
-mapBackground=getMapBackground(mapImageFilename="small_map.png")
+mapBackground=getMapBackground(mapImageFilename="Maps/map.png")
 screen=pygame.display.set_mode((mapBackground.image.get_width(),mapBackground.image.get_height()))
 screen.blit(mapBackground.image, mapBackground.rect)
 pygame.display.update()
