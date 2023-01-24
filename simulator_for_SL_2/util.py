@@ -4,6 +4,7 @@ import numpy as np
 import pygame
 import os
 import random
+import pickle
 
 INF=1e18
 
@@ -121,3 +122,12 @@ def getDistancePointLineSegment(point,line_segment):
     dy = y - y3
     dist = sqrt(dx*dx + dy*dy)
     return dist
+
+def saveObject(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
+def loadObject(filename):
+    with open(filename, 'rb') as inp:
+        obj = pickle.load(inp)
+    return obj

@@ -34,7 +34,7 @@ screen=pygame.display.set_mode((mapBackgrounds[0].image.get_width(),mapBackgroun
 screen.blit(mapBackgrounds[0].image, mapBackgrounds[0].rect)
 env.renderSubGoals(screen)
 pygame.display.update()
-time.sleep(5)
+time.sleep(2)
 
 apfDataFilename = f"Datasets/apf_data_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.csv"
 checkpointFilename= f"Checkpoints/checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.pth"
@@ -43,34 +43,33 @@ tempCheckpointFilename= f"Checkpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}
 
 fields=["output_linear_velocity","output_angular_velocity","distance_from_goal","angle_from_goal"]
 fields+=[f"lidar_depth_{i}" for i in range(1,1+NUMBER_OF_LIDAR_ANGLES)]
-# with open(tempDataFilename,'w') as csvfile: 
-#     csvwriter = csv.writer(csvfile)
-#     csvwriter.writerow(fields)
+with open(tempDataFilename,'w') as csvfile: 
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerow(fields)
 
 pathNumTimestamps=[[] for _ in range(len(MAPS))]
 pathClearances=[[] for _ in range(len(MAPS))]
 pathAvgGoalDistances=[[] for _ in range(len(MAPS))]
 
+ctrAllPassed=0
 keepIterating=True
 policy=Policy()
-NUM_ITERATIONS=5
+NUM_ITERATIONS=40
 for i in range(1,1+NUM_ITERATIONS):
     allMapsPassed=True
     mapsPassed=[] 
     print(f"\n***Iteration {i}***")
     if USE_CHECKPOINT:
-        # if i==1:
-        #     policy.loadWeights(checkpointFilename)
-        # else:
-        policy.storeLearntWeightsFromData(tempDataFilename,tempCheckpointFilename)
-        policy.loadWeights(tempCheckpointFilename)
+        if i==1:
+            policy.loadModel(checkpointFilename)
+        else:
+            policy.learnAndSaveModel(tempDataFilename,tempCheckpointFilename)
     else:
         if i==1:
-            policy.storeLearntWeightsFromData(apfDataFilename,checkpointFilename)
-            policy.loadWeights(checkpointFilename)
+            policy.learnAndSaveModel(apfDataFilename,checkpointFilename)
         else:
-            policy.storeLearntWeightsFromData(tempDataFilename,tempCheckpointFilename)
-            policy.loadWeights(tempCheckpointFilename)
+            policy.learnAndSaveModel(tempDataFilename,tempCheckpointFilename)
+            
 
     rows=[]
     for j in range(len(MAPS)):
@@ -132,8 +131,11 @@ for i in range(1,1+NUM_ITERATIONS):
             else:
                 rows.append(row)
 
-            if env.getAgentClearances()[0]==-1 or env.getAgentClearances()[0]<=3:
+            if env.getAgentClearances()[0]==-1 or env.getAgentClearances()[0]<=1.5:
                 for _ in range(4):
+                    rows.append(row)
+            elif env.getAgentClearances()[0]<=3:
+                for _ in range(2):
                     rows.append(row)
 
             if(env.getAgentClearances()[0]==-1):
@@ -181,11 +183,17 @@ for i in range(1,1+NUM_ITERATIONS):
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(rows)
 
-    print("Execution Time since start:",(time.time()-start_time),"s")
-    print(mapsPassed)
+    if allMapsPassed:
+        ctrAllPassed+=1
+        curFile="WorkingCheckpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}_V_{ctrAllPassed}.pth"
+        policy.saveModel(curFile)
 
-    if allMapsPassed==True:
-        break
+    print("Execution Time since start:",(time.time()-start_time),"s")
+    print("mapsPassed:",mapsPassed)
+    print("ctrAllPassed:",ctrAllPassed)
+
+    # if i>=15 and allMapsPassed==True:
+    #     break
 
 print()
 print(pathNumTimestamps)

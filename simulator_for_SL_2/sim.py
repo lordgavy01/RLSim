@@ -35,7 +35,7 @@ screen=pygame.display.set_mode((mapBackgrounds[0].image.get_width(),mapBackgroun
 screen.blit(mapBackgrounds[0].image, mapBackgrounds[0].rect)
 env.renderSubGoals(screen)
 pygame.display.update()
-time.sleep(2)
+# time.sleep(2)
 
 # for j in range(len(MAPS)):
 #     env=Environment()
@@ -47,36 +47,18 @@ time.sleep(2)
 #     pygame.display.update()
 #     time.sleep(7)
 
-apfDataFilename = f"Datasets/apf_data_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.csv"
-checkpointFilename= f"Checkpoints/checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.pth"
-tempDataFilename = f"Datasets/iter_data_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.csv"
-tempCheckpointFilename= f"Checkpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.pth"
-
-fields=["output_linear_velocity","output_angular_velocity","distance_from_goal","angle_from_goal"]
-fields+=[f"lidar_depth_{i}" for i in range(1,1+NUMBER_OF_LIDAR_ANGLES)]
-
 pathNumTimestamps=[[] for _ in range(len(MAPS))]
 pathClearances=[[] for _ in range(len(MAPS))]
 pathAvgGoalDistances=[[] for _ in range(len(MAPS))]
 
 keepIterating=True
 policy=Policy()
-NUM_ITERATIONS=1
+curFile=f"WorkingCheckpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}_8.pth"
+policy.loadModel(curFile)
+NUM_ITERATIONS=5
 for i in range(1,1+NUM_ITERATIONS): 
     print(f"\n***Iteration {i}***")
-    if USE_CHECKPOINT:
-        if i==1:
-            policy.loadWeights(tempCheckpointFilename)
-        else:
-            policy.storeLearntWeightsFromData(tempDataFilename,tempCheckpointFilename)
-            policy.loadWeights(tempCheckpointFilename)
-    else:
-        if i==1:
-            policy.storeLearntWeightsFromData(apfDataFilename,checkpointFilename)
-            policy.loadWeights(checkpointFilename)
-        else:
-            policy.storeLearntWeightsFromData(tempDataFilename,tempCheckpointFilename)
-            policy.loadWeights(tempCheckpointFilename)
+    allMapsPassed=True
 
     rows=[]
     for j in range(len(MAPS)):
@@ -88,7 +70,7 @@ for i in range(1,1+NUM_ITERATIONS):
         screen.blit(mapBackgrounds[j].image, mapBackgrounds[j].rect)
         running=True
         lastProgress=0
-        isApfOn=0
+        isApfOn=1
         robotColor=(255,0,0)
         collisionFlag=False
         numTimestamps=0
@@ -122,7 +104,7 @@ for i in range(1,1+NUM_ITERATIONS):
                 env.agentStates[0].distanceGoal,
                 env.agentStates[0].thetaGoal,
                 ]+env.agentStates[0].lidarData[1]
-            reward=env.executeAction(action,noise=0.1,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
+            reward=env.executeAction(action,noise=0.5,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
             env.render(screen,robotColor)
             pygame.display.update()
 
@@ -130,17 +112,6 @@ for i in range(1,1+NUM_ITERATIONS):
             pathClearance=min(pathClearance,env.getAgentClearances()[0])
             goalDistance=euclidean((env.agentPoses[0][0],env.agentPoses[0][1]),(env.agentGoals[0][0],env.agentGoals[0][1]))
             sumGoalDistance+=goalDistance
-
-            if(abs(row[1])<abs(radians(1))):
-                epsilon=random.uniform(0,1)
-                if(epsilon<=APF_DATA_NO_ROTATE_KEEP):
-                    rows.append(row)
-            else:
-                rows.append(row)
-
-            if env.getAgentClearances()[0]==-1 or env.getAgentClearances()[0]<=3.5:
-                for _ in range(4):
-                    rows.append(row)
 
             if(env.getAgentClearances()[0]==-1):
                 print(env.getAgentClearances())
@@ -172,6 +143,7 @@ for i in range(1,1+NUM_ITERATIONS):
             pathClearances[j].append(pathClearance)
             pathAvgGoalDistances[j].append(sumGoalDistance/numTimestamps)
         else:
+            allMapsPassed=False
             pathNumTimestamps[j].append(INF)
             pathClearances[j].append(0)
             pathAvgGoalDistances[j].append(sumGoalDistance/numTimestamps)
@@ -181,8 +153,62 @@ for i in range(1,1+NUM_ITERATIONS):
 
     print("Execution Time since start:",(time.time()-start_time),"s")
 print()
-print(pathNumTimestamps)
-print(pathClearances)   
-print(pathAvgGoalDistances)    
+# print(pathNumTimestamps)
+# print(pathClearances)   
+# print(pathAvgGoalDistances)    
+
+successCtr=0
+minNumTimestamps=[INF]*len(MAPS)
+maxNumTimestamps=[0]*len(MAPS)
+sumNumTimestamps=[0]*len(MAPS)
+avgNumTimestamps=[0]*len(MAPS)
+minPathClearance=[INF]*len(MAPS)
+maxPathClearance=[0]*len(MAPS)
+sumPathClearance=[0]*len(MAPS)
+avgPathClearance=[0]*len(MAPS)
+minPathAvgGoalDistances=[INF]*len(MAPS)
+maxPathAvgGoalDistances=[0]*len(MAPS)
+sumPathAvgGoalDistances=[0]*len(MAPS)
+avgPathAvgGoalDistances=[0]*len(MAPS)
+
+for i in range(len(pathNumTimestamps[0])):
+    allMapsPassed=True
+    for j in range(len(MAPS)):
+        if pathNumTimestamps[j][i]==INF:
+            allMapsPassed=False
+            break
+    if allMapsPassed:
+        successCtr+=1
+    else:
+        continue
+    for j in range(len(MAPS)):
+        minNumTimestamps[j]=min(minNumTimestamps[j],pathNumTimestamps[j][i])
+        maxNumTimestamps[j]=max(maxNumTimestamps[j],pathNumTimestamps[j][i])
+        sumNumTimestamps[j]=sumNumTimestamps[j]+pathNumTimestamps[j][i]
+        minPathClearance[j]=min(minPathClearance[j],pathClearances[j][i])
+        maxPathClearance[j]=max(maxPathClearance[j],pathClearances[j][i])
+        sumPathClearance[j]=sumPathClearance[j]+pathClearances[j][i]
+        minPathAvgGoalDistances[j]=min(minPathAvgGoalDistances[j],pathAvgGoalDistances[j][i])
+        maxPathAvgGoalDistances[j]=max(maxPathAvgGoalDistances[j],pathAvgGoalDistances[j][i])
+        sumPathAvgGoalDistances[j]=sumPathAvgGoalDistances[j]+pathAvgGoalDistances[j][i]
+for j in range(len(MAPS)):    
+    avgNumTimestamps[j]=sumNumTimestamps[j]/successCtr
+    avgPathClearance[j]=sumPathClearance[j]/successCtr
+    avgPathAvgGoalDistances[j]=sumPathAvgGoalDistances[j]/successCtr
+
+print(minNumTimestamps)
+print(maxNumTimestamps)
+print(sumNumTimestamps)
+print(avgNumTimestamps)
+print()
+print(minPathClearance)
+print(maxPathClearance)
+print(avgPathClearance)
+print()
+print(minPathAvgGoalDistances)
+print(maxPathAvgGoalDistances)
+print(avgPathAvgGoalDistances)
+print()
+print(successCtr)
 
 print("Execution Time:",(time.time()-start_time)/60,"mins")
