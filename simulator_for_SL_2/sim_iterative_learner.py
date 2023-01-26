@@ -54,7 +54,7 @@ pathAvgGoalDistances=[[] for _ in range(len(MAPS))]
 ctrAllPassed=0
 keepIterating=True
 policy=Policy()
-NUM_ITERATIONS=40
+NUM_ITERATIONS=50
 for i in range(1,1+NUM_ITERATIONS):
     allMapsPassed=True
     mapsPassed=[] 

@@ -50,12 +50,14 @@ pygame.display.update()
 pathNumTimestamps=[[] for _ in range(len(MAPS))]
 pathClearances=[[] for _ in range(len(MAPS))]
 pathAvgGoalDistances=[[] for _ in range(len(MAPS))]
+successRate=[[] for _ in range(len(MAPS))]
 
 keepIterating=True
 policy=Policy()
-curFile=f"WorkingCheckpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}_8.pth"
+# curFile=f"WorkingCheckpoints/iter_checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}_8.pth"
+curFile=f"Checkpoints/checkpoint_{FILE_NUM}_{APF_DATA_ITER}_{APF_DATA_NO_ROTATE_KEEP}.pth"
 policy.loadModel(curFile)
-NUM_ITERATIONS=5
+NUM_ITERATIONS=30
 for i in range(1,1+NUM_ITERATIONS): 
     print(f"\n***Iteration {i}***")
     allMapsPassed=True
@@ -104,7 +106,7 @@ for i in range(1,1+NUM_ITERATIONS):
                 env.agentStates[0].distanceGoal,
                 env.agentStates[0].thetaGoal,
                 ]+env.agentStates[0].lidarData[1]
-            reward=env.executeAction(action,noise=0.5,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
+            reward=env.executeAction(action,noise=0.1,goalDistanceThreshold=GOAL_DISTANCE_THRESHOLD)
             env.render(screen,robotColor)
             pygame.display.update()
 
@@ -125,7 +127,7 @@ for i in range(1,1+NUM_ITERATIONS):
                     running=False
                     break
             
-            if(numTimestamps>400):
+            if(numTimestamps>1000):
                 print("Time Limit Exceeded")
                 collisionFlag=True
                 break  
@@ -142,73 +144,57 @@ for i in range(1,1+NUM_ITERATIONS):
             pathNumTimestamps[j].append(numTimestamps)
             pathClearances[j].append(pathClearance)
             pathAvgGoalDistances[j].append(sumGoalDistance/numTimestamps)
+            successRate[j].append(1)
         else:
             allMapsPassed=False
             pathNumTimestamps[j].append(INF)
             pathClearances[j].append(0)
             pathAvgGoalDistances[j].append(sumGoalDistance/numTimestamps)
+            successRate[j].append(0)
     
     if not keepIterating:
-            break
+        break
 
     print("Execution Time since start:",(time.time()-start_time),"s")
 print()
+# print(successRate)
+# print()
 # print(pathNumTimestamps)
+# print()
 # print(pathClearances)   
+# print()
 # print(pathAvgGoalDistances)    
+# print()
 
-successCtr=0
-minNumTimestamps=[INF]*len(MAPS)
-maxNumTimestamps=[0]*len(MAPS)
 sumNumTimestamps=[0]*len(MAPS)
 avgNumTimestamps=[0]*len(MAPS)
-minPathClearance=[INF]*len(MAPS)
-maxPathClearance=[0]*len(MAPS)
 sumPathClearance=[0]*len(MAPS)
 avgPathClearance=[0]*len(MAPS)
-minPathAvgGoalDistances=[INF]*len(MAPS)
-maxPathAvgGoalDistances=[0]*len(MAPS)
 sumPathAvgGoalDistances=[0]*len(MAPS)
 avgPathAvgGoalDistances=[0]*len(MAPS)
+sumSuccessRate=[0]*len(MAPS)
+avgSuccessRate=[0]*len(MAPS)
 
-for i in range(len(pathNumTimestamps[0])):
-    allMapsPassed=True
-    for j in range(len(MAPS)):
-        if pathNumTimestamps[j][i]==INF:
-            allMapsPassed=False
-            break
-    if allMapsPassed:
-        successCtr+=1
-    else:
-        continue
-    for j in range(len(MAPS)):
-        minNumTimestamps[j]=min(minNumTimestamps[j],pathNumTimestamps[j][i])
-        maxNumTimestamps[j]=max(maxNumTimestamps[j],pathNumTimestamps[j][i])
-        sumNumTimestamps[j]=sumNumTimestamps[j]+pathNumTimestamps[j][i]
-        minPathClearance[j]=min(minPathClearance[j],pathClearances[j][i])
-        maxPathClearance[j]=max(maxPathClearance[j],pathClearances[j][i])
-        sumPathClearance[j]=sumPathClearance[j]+pathClearances[j][i]
-        minPathAvgGoalDistances[j]=min(minPathAvgGoalDistances[j],pathAvgGoalDistances[j][i])
-        maxPathAvgGoalDistances[j]=max(maxPathAvgGoalDistances[j],pathAvgGoalDistances[j][i])
-        sumPathAvgGoalDistances[j]=sumPathAvgGoalDistances[j]+pathAvgGoalDistances[j][i]
-for j in range(len(MAPS)):    
-    avgNumTimestamps[j]=sumNumTimestamps[j]/successCtr
-    avgPathClearance[j]=sumPathClearance[j]/successCtr
-    avgPathAvgGoalDistances[j]=sumPathAvgGoalDistances[j]/successCtr
+for j in range(len(MAPS)):
+    for i in range(len(pathNumTimestamps[0])):
+        sumSuccessRate[j]+=successRate[j][i]
+        if successRate[j][i]==1:
+            sumNumTimestamps[j]+=pathNumTimestamps[j][i]
+            sumPathClearance[j]+=pathClearances[j][i]
+            sumPathAvgGoalDistances[j]+=pathAvgGoalDistances[j][i]
+    avgSuccessRate[j]=sumSuccessRate[j]/len(pathNumTimestamps[0])
+    avgNumTimestamps[j]=sumNumTimestamps[j]/len(pathNumTimestamps[0])
+    avgPathClearance[j]=sumPathClearance[j]/len(pathNumTimestamps[0])
+    avgPathAvgGoalDistances[j]=sumPathAvgGoalDistances[j]/len(pathNumTimestamps[0])
 
-print(minNumTimestamps)
-print(maxNumTimestamps)
-print(sumNumTimestamps)
+
+print(avgSuccessRate)
+print()
 print(avgNumTimestamps)
 print()
-print(minPathClearance)
-print(maxPathClearance)
 print(avgPathClearance)
 print()
-print(minPathAvgGoalDistances)
-print(maxPathAvgGoalDistances)
 print(avgPathAvgGoalDistances)
 print()
-print(successCtr)
 
 print("Execution Time:",(time.time()-start_time)/60,"mins")

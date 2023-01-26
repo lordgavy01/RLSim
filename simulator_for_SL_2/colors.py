@@ -6,3 +6,5 @@ class Colors:
     black=(0,0,0)
     white=(255,255,255)
     cyan=(0,255,255)
+    magenta=(255,0,255)
+    navy=(0,0,128)
