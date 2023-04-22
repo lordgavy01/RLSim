@@ -36,7 +36,7 @@ while running:
         if event.type==pygame.MOUSEBUTTONDOWN:
             pos=pygame.mouse.get_pos()
             x,y=pos
-            side_length=40
+            side_length=20
             print(pos)
             draw_hexagon(screen,x,y,side_length)
             # print(Poly[-1])
@@ -44,10 +44,10 @@ while running:
         
     pygame.display.flip()
 
-n=input()
-if n==7:
-    exit(0)
-pygame.image.save(screen,"geomap.png")
+# n=input()
+# if n==7:
+#     exit(0)
+pygame.image.save(screen,"cir.png")
 
 # write list of points in Poly to file out.txt
 with open("out.txt","w") as f:
